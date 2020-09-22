@@ -1,0 +1,38 @@
+*====================================================================================*
+				Creating the Database Tables
+Create table LBOOK
+(BookID Varchar2(5) Primary Key,
+BookName Char(40) Not Null);
+Create table LSTUDENT
+(StudentID Varchar2(5) Primary Key,
+StudentName Char(40) Not Null,
+Course Char(20));
+Create table LTRANS
+(BookID Varchar2(5),
+StudID Varchar2(5),
+TDate date Default SYSDATE,
+BookStatus Varchar2(1),
+Constraint transstud FOREIGN KEY (StudID) REFERENCES lstudent(studentid),
+Constraint transbook FOREIGN KEY (BookID) REFERENCES lbook(bookid));
+*====================================================================================*
+				A few noted SQL Queries
+select lstudent.studentname as 'Student Name',lbook.bookname as 'Book Name' from
+lstudent join ltrans on (lstudent.studentid=ltrans.studid) join lbook on
+(lbook.bookid=ltrans.bookid) where ltrans.bookstatus='I' order by 'student name';
+
+select studentname as 'BookNeverIssued2' from lstudent where studentid not in
+(select distinct studid from ltrans);
+
+select lstudent.studentname as studentName ,
+lbook.bookname as bookName, count(lstudent.studentname) as 'NoOfTimes' from 
+lstudent join ltrans on (lstudent.studentid=ltrans.studid) 
+join lbook on (ltrans.bookid=lbook.bookid)
+group by lstudent.studentname, lbook.bookname order by lstudent.studentname;
+
+select s.bookname as 'Book Name', count(*) as 'NoOfTimes' from 
+lbook s join ltrans on (s.bookid=ltrans.bookid) 
+group by s.bookname having count(*)>1;
+
+select bookid, bookname as 'Books Available' from lbook where not exists (
+select bookid from ltrans where ltrans.bookid=lbook.bookid and ltrans.bookstatus='I');
+*====================================================================================*
